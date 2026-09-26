@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ application['application_id'] }} — Admin{% endblock %}
+{% block content %}
+
+<a href="{{ url_for('admin_applications') }}" class="btn btn-ghost btn-sm" style="margin-bottom:16px;padding-left:0;">&larr; Back to Applications</a>
+
+<div class="section-title-row">
+  <div>
+    <h1 class="greeting" style="margin-bottom:2px;">{{ application['full_name'] or 'Applicant' }}</h1>
+    <p class="greeting-sub" style="margin-bottom:0;">Application ID: <span class="mono">{{ application['application_id'] }}</span></p>
+  </div>
+  {% if application['status'] == 'Completed' %}<span class="chip chip-success">{{ application['status'] }}</span>
+  {% elif application['status'] == 'Rejected' %}<span class="chip chip-error">{{ application['status'] }}</span>
+  {% else %}<span class="chip chip-warning">{{ application['status'] }}</span>{% endif %}
+</div>
+
+<div class="grid grid-2" style="align-items:start;">
+  <div class="card">
+    <h3 style="font-size:1rem;">Applicant Details</h3>
+    <div class="summary-grid">
+      <div class="summary-row"><span class="k">Full Name</span><span>{{ application['full_name'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Date of Birth</span><span>{{ application['dob'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Gender</span><span>{{ application['gender'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Email</span><span>{{ application['email'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Mobile</span><span>{{ application['mobile'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Passport Type</span><span>{{ application['passport_type'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Address</span><span>{{ application['address'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">City / State</span><span>{{ application['city'] or '—' }}, {{ application['state'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">PIN Code</span><span>{{ application['pincode'] or '—' }}</span></div>
+      <div class="summary-row"><span class="k">Payment</span><span>{{ application['payment_status'] }}</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:1rem;">Update Status</h3>
+    <div class="field">
+      <label for="statusSelect">Application Status</label>
+      <select class="input" id="statusSelect">
+        {% for s in stages %}
+        <option value="{{ s }}" {{ 'selected' if application['status']==s }}>{{ s }}</option>
+        {% endfor %}
+        <option value="Rejected" {{ 'selected' if application['status']=='Rejected' }}>Rejected</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="updateStatus('{{ application['application_id'] }}')">Update Status</button>
+
+    {% if appointment %}
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border-soft);">
+      <h3 style="font-size:1rem;">Appointment</h3>
+      <p style="margin:0;font-size:0.88rem;">{{ appointment['office'] }}<br>{{ appointment['appt_date'] }} at {{ appointment['appt_time'] }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="section-title-row" style="margin-top:24px;">
+  <h3>Uploaded Documents</h3>
+</div>
+<div class="grid grid-3">
+  {% for d in documents %}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;text-transform:capitalize;">{{ d['doc_type'].replace('_',' ') }}</div>
+        <div style="font-size:0.8rem;color:var(--ink-soft);word-break:break-all;">{{ d['original_name'] }}</div>
+      </div>
+      {% if d['verified'] %}<span class="chip chip-success">Verified</span>{% else %}<span class="chip chip-warning">Pending</span>{% endif %}
+    </div>
+    <button class="btn {{ 'btn-secondary' if d['verified'] else 'btn-primary' }} btn-sm btn-block"
+      onclick="toggleVerify({{ d['id'] }}, {{ 'false' if d['verified'] else 'true' }}, this)">
+      {{ 'Mark as Pending' if d['verified'] else 'Verify Document' }}
+    </button>
+  </div>
+  {% else %}
+  <p>No documents uploaded yet.</p>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function updateStatus(appId) {
+  const status = document.getElementById('statusSelect').value;
+  const res = await apiPost(`/api/admin/application/${appId}/status`, { status });
+  if (res.ok) { showToast('Status updated.', 'success'); setTimeout(() => location.reload(), 700); }
+  else showToast(res.error || 'Failed to update status.', 'error');
+}
+async function toggleVerify(docId, verified, btn) {
+  btn.disabled = true;
+  const res = await apiPost(`/api/admin/document/${docId}/verify`, { verified });
+  if (res.ok) { showToast('Document updated.', 'success'); setTimeout(() => location.reload(), 500); }
+  else { showToast('Failed to update document.', 'error'); btn.disabled = false; }
+}
+</script>
+{% endblock %}

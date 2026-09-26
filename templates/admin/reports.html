@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}Reports — Admin{% endblock %}
+{% block content %}
+
+<h1 class="greeting">Reports</h1>
+<p class="greeting-sub">Application trends and breakdowns.</p>
+
+<div class="grid grid-2">
+  <div class="chart-card">
+    <h3>By Status</h3>
+    {% set max_c = (by_status|map(attribute='c')|list or [1])|max %}
+    <div class="bar-chart">
+      {% for s in by_status %}
+      <div class="bar-col">
+        <div class="bar" style="height:{{ (s['c'] / max_c * 100)|round(0) }}%;"></div>
+        <div class="bar-label">{{ s['status'][:10] }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <h3>By Passport Type</h3>
+    {% set max_t = (by_type|map(attribute='c')|list or [1])|max %}
+    <div class="bar-chart">
+      {% for t in by_type %}
+      <div class="bar-col">
+        <div class="bar" style="height:{{ (t['c'] / max_t * 100)|round(0) }}%;"></div>
+        <div class="bar-label">{{ t['passport_type'] or '—' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="chart-card" style="margin-top:20px;">
+  <h3>Top States by Applications</h3>
+  <div class="donut-legend">
+    {% for s in by_state %}
+    <div class="donut-legend-item">
+      <span class="lbl">{{ s['state'] }}</span>
+      <strong>{{ s['c'] }}</strong>
+    </div>
+    {% else %}
+    <p>No data yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

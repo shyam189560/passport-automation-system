@@ -1,0 +1,121 @@
+{% extends "app_base.html" %}
+{% block title %}Dashboard — Passport Automation System{% endblock %}
+{% block content %}
+
+<h1 class="greeting">Good day, {{ current_user['full_name'].split(' ')[0] }}</h1>
+<p class="greeting-sub">Here's the current status of your passport application.</p>
+
+{% if application %}
+<div class="status-hero">
+  <div class="status-hero-top">
+    <div>
+      <div class="app-id">Application ID: {{ application['application_id'] }}</div>
+      <h2>{{ application['status'] }}</h2>
+    </div>
+    <span class="status-hero-badge">{{ application['passport_type'] or 'New Passport' }}</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" style="width:{{ application['progress'] }}%;"></div></div>
+  <div class="progress-meta">
+    <span>{{ application['progress'] }}% complete</span>
+    <span>Last updated {{ application['updated_at'] }}</span>
+  </div>
+</div>
+
+<div class="grid grid-4">
+  <div class="card stat-card">
+    <div class="stat-icon" style="background:var(--primary-light);color:var(--primary);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    </div>
+    <span class="stat-label">Application Status</span>
+    <span class="stat-value" style="font-size:1.05rem;">{{ application['status'] }}</span>
+    <span class="stat-foot">Step {{ application['step_completed'] }} of 5</span>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-icon" style="background:var(--success-bg);color:var(--success);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
+    </div>
+    <span class="stat-label">Document Status</span>
+    <span class="stat-value" style="font-size:1.05rem;">{{ docs_verified }}/{{ docs_total }} Verified</span>
+    <span class="stat-foot">{{ documents|length }} uploaded</span>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-icon" style="background:var(--warning-bg);color:var(--warning);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </div>
+    <span class="stat-label">Appointment</span>
+    <span class="stat-value" style="font-size:1.05rem;">{{ appointment['appt_date'] if appointment else 'Not booked' }}</span>
+    <span class="stat-foot">{{ appointment['appt_time'] if appointment else 'Book a convenient slot' }}</span>
+  </div>
+  <div class="card stat-card">
+    <div class="stat-icon" style="background:var(--primary-light);color:var(--primary);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    </div>
+    <span class="stat-label">Payment Status</span>
+    <span class="stat-value" style="font-size:1.05rem;">{{ application['payment_status'] }}</span>
+    <span class="stat-foot">Application fee</span>
+  </div>
+</div>
+{% else %}
+<div class="card empty-state">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l7 3v6c0 5-3.4 8.4-7 11-3.6-2.6-7-6-7-11V5l7-3z"/></svg>
+  <h3>No application yet</h3>
+  <p>Start your passport application to see your status here.</p>
+  <a href="{{ url_for('application_form') }}" class="btn btn-primary" style="margin-top:14px;">Start Application</a>
+</div>
+{% endif %}
+
+<div class="section-title-row" style="margin-top:32px;">
+  <h3>Quick Actions</h3>
+</div>
+<div class="quick-actions">
+  <a href="{{ url_for('application_form') }}" class="quick-action">
+    <div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+    <span>Continue Application</span>
+  </a>
+  <a href="{{ url_for('application_form') }}#documents" class="quick-action">
+    <div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></div>
+    <span>Upload Documents</span>
+  </a>
+  <a href="{{ url_for('appointment_page') }}" class="quick-action">
+    <div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+    <span>Book Appointment</span>
+  </a>
+  <a href="{{ url_for('track_page') }}" class="quick-action">
+    <div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+    <span>Track Application</span>
+  </a>
+  <a href="#" onclick="downloadReceipt(event)" class="quick-action">
+    <div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg></div>
+    <span>Download Receipt</span>
+  </a>
+</div>
+
+{% if application %}
+<div class="section-title-row"><h3>Recent Notifications</h3></div>
+<div class="grid grid-2">
+  {% for n in notifications[:4] %}
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+      <div>
+        <div style="font-weight:600;font-size:0.92rem;margin-bottom:4px;">{{ n['title'] }}</div>
+        <p style="font-size:0.86rem;margin:0;">{{ n['message'] }}</p>
+      </div>
+      <span class="chip chip-info" style="flex-shrink:0;">New</span>
+    </div>
+  </div>
+  {% else %}
+  <p>No notifications yet.</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadReceipt(e) {
+  e.preventDefault();
+  showToast('Receipt download is a demo feature — not connected to a real payment gateway.', 'default');
+}
+</script>
+{% endblock %}

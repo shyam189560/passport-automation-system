@@ -1,0 +1,193 @@
+{% extends "app_base.html" %}
+{% block title %}Passport Application — Passport Automation System{% endblock %}
+{% block content %}
+
+<div class="form-shell" id="documents">
+  <div class="stepper" id="stepper">
+    <div class="stepper-item active" data-step="1">
+      <div class="stepper-circle">1</div>
+      <div class="stepper-label">Personal</div>
+    </div>
+    <div class="stepper-item" data-step="2">
+      <div class="stepper-circle">2</div>
+      <div class="stepper-label">Address</div>
+    </div>
+    <div class="stepper-item" data-step="3">
+      <div class="stepper-circle">3</div>
+      <div class="stepper-label">Passport</div>
+    </div>
+    <div class="stepper-item" data-step="4">
+      <div class="stepper-circle">4</div>
+      <div class="stepper-label">Documents</div>
+    </div>
+    <div class="stepper-item" data-step="5">
+      <div class="stepper-circle">5</div>
+      <div class="stepper-label">Review</div>
+    </div>
+  </div>
+
+  <div class="form-panel">
+
+    <!-- STEP 1: Personal Information -->
+    <div class="step-panel" data-panel="1">
+      <h2>Personal Information</h2>
+      <p class="panel-sub">Tell us a little about yourself.</p>
+      <div class="field">
+        <label for="full_name">Full Name</label>
+        <input class="input" id="full_name" placeholder="As per identity proof" value="{{ application['full_name'] if application else '' }}">
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="dob">Date of Birth</label>
+          <input class="input" type="date" id="dob" value="{{ application['dob'] if application else '' }}">
+        </div>
+        <div class="field">
+          <label for="gender">Gender</label>
+          <select class="input" id="gender">
+            <option value="">Select</option>
+            <option value="Male" {{ 'selected' if application and application['gender']=='Male' }}>Male</option>
+            <option value="Female" {{ 'selected' if application and application['gender']=='Female' }}>Female</option>
+            <option value="Other" {{ 'selected' if application and application['gender']=='Other' }}>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" type="email" id="email" placeholder="you@example.com" value="{{ application['email'] if application else current_user['email'] }}">
+        </div>
+        <div class="field">
+          <label for="mobile">Mobile Number</label>
+          <input class="input" type="tel" id="mobile" placeholder="10-digit mobile number" value="{{ application['mobile'] if application else current_user['phone'] or '' }}">
+        </div>
+      </div>
+      <div class="form-nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="nextStep(1)">Continue <span class="save-spinner" style="display:none;" id="spin-1"><span class="spinner"></span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Address Information -->
+    <div class="step-panel" data-panel="2" style="display:none;">
+      <h2>Address Information</h2>
+      <p class="panel-sub">Where should we send your passport?</p>
+      <div class="field">
+        <label for="address">Address</label>
+        <textarea class="input" id="address" rows="3" placeholder="House no., street, locality">{{ application['address'] if application else '' }}</textarea>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="city">City</label>
+          <input class="input" id="city" placeholder="City" value="{{ application['city'] if application else '' }}">
+        </div>
+        <div class="field">
+          <label for="state">State</label>
+          <input class="input" id="state" placeholder="State" value="{{ application['state'] if application else '' }}">
+        </div>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label for="pincode">PIN Code</label>
+        <input class="input" id="pincode" placeholder="6-digit PIN" value="{{ application['pincode'] if application else '' }}">
+      </div>
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+        <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Passport Details -->
+    <div class="step-panel" data-panel="3" style="display:none;">
+      <h2>Passport Details</h2>
+      <p class="panel-sub">What are you applying for?</p>
+      <div class="type-options" id="typeOptions">
+        <label class="type-option" data-value="New Passport">
+          <input type="radio" name="passport_type" value="New Passport">
+          <div class="icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 3v6c0 5-3.4 8.4-7 11-3.6-2.6-7-6-7-11V5l7-3z"/></svg></div>
+          <h4>New Passport</h4>
+          <p>First-time applicants.</p>
+        </label>
+        <label class="type-option" data-value="Renewal">
+          <input type="radio" name="passport_type" value="Renewal">
+          <div class="icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10a8 8 0 00-14.9-3M4 14a8 8 0 0014.9 3"/></svg></div>
+          <h4>Renewal</h4>
+          <p>Passport nearing expiry.</p>
+        </label>
+        <label class="type-option" data-value="Reissue">
+          <input type="radio" name="passport_type" value="Reissue">
+          <div class="icon-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          <h4>Reissue</h4>
+          <p>Lost, damaged or updated details.</p>
+        </label>
+      </div>
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+        <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Document Upload -->
+    <div class="step-panel" data-panel="4" style="display:none;">
+      <h2>Document Upload</h2>
+      <p class="panel-sub">Upload clear scans or photos of the following documents.</p>
+      <div class="upload-grid" id="uploadGrid">
+        {% for key, label in document_types %}
+        {% set doc = documents.get(key) %}
+        <div class="upload-card {{ 'has-file' if doc }}" data-doctype="{{ key }}">
+          <div class="upload-card-top">
+            <span class="upload-card-title">{{ label }}</span>
+            {% if doc %}
+              {% if doc['verified'] %}<span class="chip chip-success">Verified</span>{% else %}<span class="chip chip-warning">Pending</span>{% endif %}
+            {% endif %}
+          </div>
+          <div class="upload-card-file">{{ doc['original_name'] if doc else 'No file uploaded' }}</div>
+          <input type="file" accept="image/*,.pdf" style="display:none;" onchange="handleUpload(event, '{{ key }}')">
+          <div class="upload-actions">
+            {% if doc %}
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Preview is a demo feature.')">Preview</button>
+              <button class="btn btn-ghost btn-sm" onclick="removeDocument('{{ key }}')">Remove</button>
+            {% else %}
+              <button class="upload-drop" onclick="this.closest('.upload-card').querySelector('input[type=file]').click()">Click to upload</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="goToStep(3)">Back</button>
+        <button class="btn btn-primary" onclick="goToStep(5); buildSummary();">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Review & Submit -->
+    <div class="step-panel" data-panel="5" style="display:none;">
+      <h2>Review &amp; Submit</h2>
+      <p class="panel-sub">Please review your details before submitting.</p>
+      <div id="summaryContainer"></div>
+      <div class="form-nav">
+        <button class="btn btn-secondary" onclick="goToStep(4)">Back</button>
+        <button class="btn btn-primary" id="submitBtn" onclick="submitApplication()">Submit Application</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box text-center">
+    <div style="width:56px;height:56px;border-radius:50%;background:var(--success-bg);color:var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h3>Application Submitted!</h3>
+    <p id="successAppId" style="margin-bottom:0;"></p>
+    <div class="modal-actions" style="justify-content:center;">
+      <a href="{{ url_for('appointment_page') }}" class="btn btn-primary">Book Appointment</a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Go to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/application.js') }}"></script>
+{% endblock %}

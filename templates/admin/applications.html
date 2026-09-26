@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Applications — Admin{% endblock %}
+{% block content %}
+
+<div class="section-title-row">
+  <h1 class="greeting" style="margin-bottom:0;">Applications</h1>
+</div>
+<p class="greeting-sub">Search, filter and manage all passport applications.</p>
+
+<div class="table-card">
+  <form class="table-toolbar" method="GET">
+    <input class="input" type="text" name="q" placeholder="Search by ID, name or email" value="{{ q }}">
+    <select class="input" name="status" style="max-width:220px;">
+      <option value="">All statuses</option>
+      {% for s in stages %}
+      <option value="{{ s }}" {{ 'selected' if status_filter==s }}>{{ s }}</option>
+      {% endfor %}
+      <option value="Rejected" {{ 'selected' if status_filter=='Rejected' }}>Rejected</option>
+    </select>
+    <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+    {% if q or status_filter %}<a href="{{ url_for('admin_applications') }}" class="btn btn-ghost btn-sm">Clear</a>{% endif %}
+  </form>
+
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Application ID</th><th>Applicant</th><th>Date</th><th>Type</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for a in applications %}
+        <tr>
+          <td class="mono">{{ a['application_id'] }}</td>
+          <td>{{ a['full_name'] or '—' }}<br><span style="color:var(--ink-faint);font-size:0.78rem;">{{ a['email'] or '' }}</span></td>
+          <td>{{ a['created_at'][:10] }}</td>
+          <td>{{ a['passport_type'] or '—' }}</td>
+          <td>
+            {% if a['status'] == 'Completed' %}<span class="chip chip-success">{{ a['status'] }}</span>
+            {% elif a['status'] == 'Rejected' %}<span class="chip chip-error">{{ a['status'] }}</span>
+            {% else %}<span class="chip chip-warning">{{ a['status'] }}</span>{% endif %}
+          </td>
+          <td><a href="{{ url_for('admin_application_detail', application_id=a['application_id']) }}" class="btn btn-secondary btn-sm">View</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state">No applications match your search.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

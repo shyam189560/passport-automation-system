@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Track Application — Passport Automation System{% endblock %}
+{% block content %}
+
+<section class="section" style="padding-top:56px;">
+  <div class="container">
+    <div class="section-head">
+      <h2>Track Your Application</h2>
+      <p>Enter your Application ID to see real-time progress.</p>
+    </div>
+
+    <div class="track-search">
+      <input class="input" id="trackInput" placeholder="e.g. PAS-2026-001245" value="{{ request.args.get('id','') }}">
+      <button class="btn btn-primary" onclick="trackApplication()" id="trackBtn">Track</button>
+    </div>
+
+    <div id="trackResult"></div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tracking.js') }}"></script>
+{% endblock %}

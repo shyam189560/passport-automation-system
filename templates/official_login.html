@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Official Login — Passport Automation System</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family: "Inter", sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(37, 99, 235, 0.12),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 80% 80%,
+                    rgba(30, 64, 175, 0.10),
+                    transparent 30%
+                ),
+                #f8fafc;
+
+            color: #0f172a;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 25px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 470px;
+        }
+
+        .login-card {
+            background: #ffffff;
+
+            border: 1px solid #e2e8f0;
+
+            border-radius: 24px;
+
+            padding: 38px;
+
+            box-shadow:
+                0 20px 60px rgba(15, 23, 42, 0.10);
+        }
+
+        /* Logo */
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin-bottom: 25px;
+        }
+
+        .logo-mark {
+            width: 58px;
+            height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1d4ed8
+                );
+
+            color: white;
+
+            font-family: "Space Grotesk", sans-serif;
+
+            font-size: 20px;
+            font-weight: 700;
+
+            box-shadow:
+                0 10px 25px rgba(37, 99, 235, .20);
+        }
+
+        .official-badge {
+            display: table;
+
+            margin: 0 auto 14px;
+
+            padding: 7px 12px;
+
+            border-radius: 999px;
+
+            background: #eff6ff;
+
+            color: #1d4ed8;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            letter-spacing: .08em;
+
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+
+            text-align: center;
+
+            font-family: "Space Grotesk", sans-serif;
+
+            font-size: 28px;
+
+            letter-spacing: -.03em;
+        }
+
+        .subtitle {
+            margin: 9px 0 30px;
+
+            text-align: center;
+
+            color: #64748b;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        /* Flash messages */
+
+        .flash {
+            padding: 12px 14px;
+
+            margin-bottom: 18px;
+
+            border-radius: 11px;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        .flash-error {
+            background: #fef2f2;
+
+            border: 1px solid #fecaca;
+
+            color: #b91c1c;
+        }
+
+        .flash-success {
+            background: #ecfdf5;
+
+            border: 1px solid #a7f3d0;
+
+            color: #047857;
+        }
+
+        /* Form */
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+        label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #334155;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+
+            left: 14px;
+
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #94a3b8;
+
+            font-size: 16px;
+        }
+
+        input {
+            width: 100%;
+
+            height: 49px;
+
+            padding: 0 15px 0 43px;
+
+            border: 1px solid #dbe2ea;
+
+            border-radius: 12px;
+
+            outline: none;
+
+            background: #fff;
+
+            color: #0f172a;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            transition: .2s;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 4px rgba(37, 99, 235, .08);
+        }
+
+        /* Button */
+
+        .login-btn {
+            width: 100%;
+
+            height: 51px;
+
+            margin-top: 7px;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1d4ed8
+                );
+
+            color: white;
+
+            font-family: inherit;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition: .2s;
+
+            box-shadow:
+                0 10px 22px rgba(30, 64, 175, .18);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 14px 28px rgba(30, 64, 175, .24);
+        }
+
+        /* Security */
+
+        .security-note {
+            display: flex;
+
+            gap: 10px;
+
+            align-items: flex-start;
+
+            margin-top: 22px;
+
+            padding: 13px;
+
+            border-radius: 12px;
+
+            background: #f8fafc;
+
+            border: 1px solid #e2e8f0;
+
+            color: #64748b;
+
+            font-size: 11px;
+
+            line-height: 1.55;
+        }
+
+        .security-icon {
+            color: #2563eb;
+
+            font-size: 15px;
+        }
+
+        /* Back */
+
+        .back-link {
+            display: block;
+
+            margin-top: 22px;
+
+            text-align: center;
+
+            color: #2563eb;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 22px;
+
+            text-align: center;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+        }
+
+        @media (max-width: 520px) {
+
+            .login-card {
+                padding: 28px 22px;
+
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+
+        <!-- Logo -->
+
+        <div class="logo">
+
+            <div class="logo-mark">
+                PA
+            </div>
+
+        </div>
+
+
+        <div class="official-badge">
+            Official Portal
+        </div>
+
+
+        <h1>
+            Official Login
+        </h1>
+
+
+        <p class="subtitle">
+            Authorized passport officials can securely
+            access the administration portal.
+        </p>
+
+
+        <!-- Flash Messages -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div
+                        class="flash
+                        {% if category == 'error' %}
+                            flash-error
+                        {% else %}
+                            flash-success
+                        {% endif %}"
+                    >
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- Login Form -->
+
+        <form
+            method="POST"
+            action="{{ url_for('official_login') }}"
+        >
+
+            <!-- Email -->
+
+            <div class="form-group">
+
+                <label for="email">
+                    Official Email
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        ✉
+                    </span>
+
+                    <input
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="Enter official email"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- Password -->
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <span class="input-icon">
+                        🔒
+                    </span>
+
+                    <input
+                        id="password"
+                        type="password"
+                        name="password"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-btn"
+            >
+                Sign in to Official Portal
+            </button>
+
+        </form>
+
+
+        <!-- Security -->
+
+        <div class="security-note">
+
+            <span class="security-icon">
+                🛡
+            </span>
+
+            <span>
+                This portal is restricted to authorized
+                official accounts. Unauthorized access is
+                not permitted.
+            </span>
+
+        </div>
+
+
+        <!-- Back -->
+
+        <a
+            href="{{ url_for('login') }}"
+            class="back-link"
+        >
+            ← Back to User Login
+        </a>
+
+    </div>
+
+
+    <div class="footer">
+        Passport Automation System
+    </div>
+
+</div>
+
+</body>
+
+</html>

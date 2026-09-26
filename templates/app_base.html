@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}Dashboard — Passport Automation System{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E🛂%3C/text%3E%3C/svg%3E">
+</head>
+
+<body>
+
+<div class="app-shell">
+    <div class="app-main">
+
+        <!-- Top Navigation -->
+        <div class="app-topbar">
+
+            <a href="{{ url_for('index') }}" class="brand">
+                <span class="brand-mark">PA</span>
+                <span class="hide-mobile">Passport Automation System</span>
+            </a>
+
+            <div class="topbar-actions">
+
+                <a href="{{ url_for('dashboard') }}"
+                   class="btn btn-ghost btn-sm">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('application_form') }}"
+                   class="btn btn-ghost btn-sm">
+                    Application
+                </a>
+
+                <a href="{{ url_for('appointment_page') }}"
+                   class="btn btn-ghost btn-sm">
+                    Appointment
+                </a>
+
+                <!-- Notifications Dropdown -->
+                <div class="dropdown" id="notifDropdown">
+
+                    <button
+                        type="button"
+                        class="icon-btn"
+                        onclick="toggleDropdown('notifDropdown')"
+                        aria-label="Notifications">
+
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20" height="20"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             stroke-linecap="round"
+                             stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M10 21h4"></path>
+                        </svg>
+
+                        {% if notifications and notifications|selectattr('is_read', 'equalto', 0)|list|length > 0 %}
+                            <span class="badge-dot"></span>
+                        {% endif %}
+
+                    </button>
+
+                    <div class="dropdown-menu" style="min-width: 300px;">
+                        <div class="dropdown-header">
+                            Notifications
+                        </div>
+
+                        {% if notifications %}
+                            {% for notification in notifications %}
+                                <div class="notification-item">
+                                    <strong>{{ notification['title'] }}</strong>
+                                    <p>{{ notification['message'] }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="dropdown-empty">
+                                No notifications yet.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- User Dropdown -->
+                <div class="dropdown" id="userDropdown">
+
+                    <button
+                        type="button"
+                        class="user-pill"
+                        onclick="toggleDropdown('userDropdown')">
+
+                        <span class="avatar">
+                            {{ (current_user['full_name'] or 'U')[:1] }}
+                        </span>
+
+                        <span class="hide-mobile"
+                              style="font-size: 0.86rem; font-weight: 600;">
+                            {{ current_user['full_name'] }}
+                        </span>
+
+                    </button>
+
+                    <div class="dropdown-menu">
+
+                        <a href="{{ url_for('dashboard') }}">
+                            Dashboard
+                        </a>
+
+                        <a href="{{ url_for('track_page') }}">
+                            Track Application
+                        </a>
+
+                        <a href="{{ url_for('logout') }}">
+                            Log Out
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="app-content">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

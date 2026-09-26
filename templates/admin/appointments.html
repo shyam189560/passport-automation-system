@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}Appointments — Admin{% endblock %}
+{% block content %}
+
+<h1 class="greeting">Appointments</h1>
+<p class="greeting-sub">All scheduled passport office appointments.</p>
+
+<div class="table-card">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Application ID</th><th>Applicant</th><th>Office</th><th>Date</th><th>Time</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+        <tr>
+          <td class="mono">{{ a['application_id'] }}</td>
+          <td>{{ a['full_name'] }}<br><span style="color:var(--ink-faint);font-size:0.78rem;">{{ a['email'] }}</span></td>
+          <td>{{ a['office'] }}</td>
+          <td>{{ a['appt_date'] }}</td>
+          <td>{{ a['appt_time'] }}</td>
+          <td><span class="chip chip-success">{{ a['status'] }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state">No appointments booked yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

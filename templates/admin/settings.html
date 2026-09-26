@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings — Admin{% endblock %}
+{% block content %}
+
+<h1 class="greeting">Settings</h1>
+<p class="greeting-sub">Platform preferences for this demo environment.</p>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3 style="font-size:1rem;">Admin Profile</h3>
+    <div class="field"><label>Name</label><input class="input" value="{{ current_user['full_name'] }}" disabled></div>
+    <div class="field"><label>Email</label><input class="input" value="{{ current_user['email'] }}" disabled></div>
+  </div>
+  <div class="card">
+    <h3 style="font-size:1rem;">Demo Data</h3>
+    <p style="font-size:0.88rem;">Reset the sample database back to its original demo state. This clears all applications, users, and appointments created during this session.</p>
+    <button class="btn btn-danger" onclick="resetDemo()">Reset Demo Data</button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function resetDemo() {
+  if (!confirm('This will reset all demo data. Continue?')) return;
+  const res = await apiPost('/api/reset-demo-data', {});
+  if (res.ok) { showToast('Demo data reset.', 'success'); setTimeout(() => window.location.href = '/', 800); }
+}
+</script>
+{% endblock %}

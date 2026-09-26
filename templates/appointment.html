@@ -1,0 +1,64 @@
+{% extends "app_base.html" %}
+{% block title %}Book Appointment — Passport Automation System{% endblock %}
+{% block content %}
+
+<div class="form-shell">
+  <h2 style="text-align:center;">Book Your Appointment</h2>
+  <p style="text-align:center;margin-bottom:30px;">Choose a passport office, date, and time slot that works for you.</p>
+
+  {% if not application %}
+  <div class="card empty-state">
+    <h3>Complete your application first</h3>
+    <p>You'll need an active application before booking an appointment.</p>
+    <a href="{{ url_for('application_form') }}" class="btn btn-primary" style="margin-top:10px;">Start Application</a>
+  </div>
+  {% else %}
+
+  {% if existing %}
+  <div class="card" style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:0.8rem;color:var(--ink-faint);margin-bottom:4px;">Current appointment</div>
+      <div style="font-weight:600;">{{ existing['office'] }} — {{ existing['appt_date'] }} at {{ existing['appt_time'] }}</div>
+    </div>
+    <span class="chip chip-success">{{ existing['status'] }}</span>
+  </div>
+  {% endif %}
+
+  <div class="form-panel">
+    <h2>Select Passport Office</h2>
+    <div class="office-list" id="officeList">
+      {% for office in offices %}
+      <div class="office-option" data-value="{{ office }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        {{ office }}
+      </div>
+      {% endfor %}
+    </div>
+
+    <h2>Select Date</h2>
+    <div class="date-scroll" id="dateScroll">
+      {% for d in dates %}
+      <div class="date-chip" data-value="{{ d.value }}">
+        <div class="dow">{{ d.dow }}</div>
+        <div class="dom">{{ d.dom }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h2>Available Time Slots</h2>
+    <div class="slot-grid" id="slotGrid">
+      {% for slot in slots %}
+      <div class="slot-chip" data-value="{{ slot }}">{{ slot }}</div>
+      {% endfor %}
+    </div>
+
+    <button class="btn btn-primary btn-block" id="confirmBtn" onclick="confirmAppointment()">Confirm Appointment</button>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/appointment.js') }}"></script>
+{% endblock %}

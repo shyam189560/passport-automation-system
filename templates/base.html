@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <meta
+        name="theme-color"
+        content="#0f172a"
+    >
+
+    <meta
+        name="description"
+        content="Passport Automation System — Secure, simple and transparent passport services."
+    >
+
+    <title>
+        {% block title %}
+        Passport Automation System
+        {% endblock %}
+    </title>
+
+
+    <!-- =====================================================
+         GOOGLE FONTS
+         ===================================================== -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         MAIN CSS
+         ===================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+
+    <!-- =====================================================
+         FAVICON
+         ===================================================== -->
+
+    <link
+        rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛂%3C/text%3E%3C/svg%3E"
+    >
+
+
+    {% block head %}{% endblock %}
+
+
+    <!-- =====================================================
+         PREMIUM BASE STYLES
+         ===================================================== -->
+
+    <style>
+
+        /* =====================================================
+           ROOT
+           ===================================================== */
+
+        :root {
+
+            --ai-primary: #2563eb;
+            --ai-primary-dark: #1d4ed8;
+            --ai-blue: #3b82f6;
+            --ai-cyan: #06b6d4;
+
+            --ai-dark: #0f172a;
+            --ai-dark-2: #111827;
+
+            --ai-text: #0f172a;
+            --ai-muted: #64748b;
+
+            --ai-border: rgba(148, 163, 184, .20);
+
+            --ai-glass:
+                rgba(255, 255, 255, .76);
+
+            --ai-shadow:
+                0 20px 60px rgba(15, 23, 42, .10);
+
+            --ai-radius: 18px;
+        }
+
+
+        /* =====================================================
+           GLOBAL
+           ===================================================== */
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+
+            position: relative;
+
+            overflow-x: hidden;
+
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(37, 99, 235, .07),
+                    transparent 28%
+                ),
+                radial-gradient(
+                    circle at 90% 20%,
+                    rgba(6, 182, 212, .06),
+                    transparent 25%
+                ),
+                #f8fafc;
+
+            color: var(--ai-text);
+
+            font-family: "Inter", sans-serif;
+
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+
+        /* =====================================================
+           AI BACKGROUND
+           ===================================================== */
+
+        .ai-background {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: -10;
+
+            overflow: hidden;
+
+            pointer-events: none;
+        }
+
+
+        .ai-orb {
+
+            position: absolute;
+
+            border-radius: 50%;
+
+            filter: blur(1px);
+
+            opacity: .55;
+
+            animation:
+                aiFloat 12s ease-in-out infinite;
+        }
+
+
+        .ai-orb-1 {
+
+            width: 420px;
+            height: 420px;
+
+            top: -180px;
+            left: -120px;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(37, 99, 235, .15),
+                    transparent 68%
+                );
+        }
+
+
+        .ai-orb-2 {
+
+            width: 360px;
+            height: 360px;
+
+            right: -100px;
+            top: 20%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(6, 182, 212, .12),
+                    transparent 68%
+                );
+
+            animation-delay: -4s;
+        }
+
+
+        .ai-orb-3 {
+
+            width: 450px;
+            height: 450px;
+
+            left: 35%;
+            bottom: -280px;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(99, 102, 241, .09),
+                    transparent 70%
+                );
+
+            animation-delay: -7s;
+        }
+
+
+        /* =====================================================
+           AI GRID
+           ===================================================== */
+
+        .ai-grid {
+
+            position: absolute;
+
+            inset: 0;
+
+            opacity: .22;
+
+            background-image:
+                linear-gradient(
+                    rgba(37, 99, 235, .045) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(37, 99, 235, .045) 1px,
+                    transparent 1px
+                );
+
+            background-size: 50px 50px;
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    black,
+                    transparent 85%
+                );
+        }
+
+
+        /* =====================================================
+           FLOATING AI PARTICLES
+           ===================================================== */
+
+        .ai-particle {
+
+            position: absolute;
+
+            width: 4px;
+            height: 4px;
+
+            border-radius: 50%;
+
+            background: #60a5fa;
+
+            box-shadow:
+                0 0 12px rgba(37, 99, 235, .7);
+
+            opacity: .55;
+
+            animation:
+                particleFloat 8s ease-in-out infinite;
+        }
+
+
+        .particle-1 {
+            top: 18%;
+            left: 14%;
+        }
+
+        .particle-2 {
+            top: 34%;
+            left: 82%;
+            animation-delay: -2s;
+        }
+
+        .particle-3 {
+            top: 72%;
+            left: 9%;
+            animation-delay: -4s;
+        }
+
+        .particle-4 {
+            top: 65%;
+            left: 91%;
+            animation-delay: -6s;
+        }
+
+        .particle-5 {
+            top: 46%;
+            left: 47%;
+            animation-delay: -1s;
+        }
+
+
+        /* =====================================================
+           SCROLL PROGRESS
+           ===================================================== */
+
+        .scroll-progress {
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            z-index: 9999;
+
+            width: 0%;
+            height: 3px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #2563eb,
+                    #06b6d4,
+                    #6366f1
+                );
+
+            box-shadow:
+                0 0 12px rgba(37, 99, 235, .5);
+
+            transition: width .08s linear;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+           ===================================================== */
+
+        .navbar {
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 1000;
+
+            padding: 13px 18px;
+
+            background:
+                rgba(248, 250, 252, .72);
+
+            border-bottom:
+                1px solid rgba(148, 163, 184, .16);
+
+            backdrop-filter:
+                blur(20px)
+                saturate(150%);
+
+            -webkit-backdrop-filter:
+                blur(20px)
+                saturate(150%);
+
+            transition:
+                background .25s ease,
+                box-shadow .25s ease;
+        }
+
+
+        .navbar.scrolled {
+
+            background:
+                rgba(255, 255, 255, .88);
+
+            box-shadow:
+                0 8px 30px rgba(15, 23, 42, .07);
+        }
+
+
+        .navbar-inner {
+
+            max-width: 1440px;
+
+            margin: auto;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 22px;
+        }
+
+
+        /* =====================================================
+           BRAND
+           ===================================================== */
+
+        .navbar .brand {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-shrink: 0;
+
+            color: #0f172a;
+
+            text-decoration: none;
+
+            font-family:
+                "Space Grotesk",
+                sans-serif;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            letter-spacing: -.02em;
+        }
+
+
+        .brand-mark {
+
+            position: relative;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-family:
+                "Space Grotesk",
+                sans-serif;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f172a,
+                    #1d4ed8 60%,
+                    #06b6d4
+                );
+
+            box-shadow:
+                0 8px 20px rgba(37, 99, 235, .25);
+
+            overflow: hidden;
+        }
+
+
+        .brand-mark::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 60px;
+            height: 60px;
+
+            top: -35px;
+            left: -35px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255, 255, 255, .22);
+
+            animation:
+                logoGlow 4s linear infinite;
+        }
+
+
+        .brand-mark::after {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 2px;
+
+            border-radius: 10px;
+
+            border:
+                1px solid rgba(255, 255, 255, .20);
+        }
+
+
+        /* =====================================================
+           NAV LINKS
+           ===================================================== */
+
+        .nav-links {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 4px;
+
+            flex: 1;
+        }
+
+
+        .nav-links a {
+
+            position: relative;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            padding: 9px 11px;
+
+            border-radius: 9px;
+
+            color: #475569;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            transition:
+                color .2s ease,
+                background .2s ease,
+                transform .2s ease;
+        }
+
+
+        .nav-links a::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 50%;
+            bottom: 4px;
+
+            width: 0;
+            height: 2px;
+
+            border-radius: 99px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #2563eb,
+                    #06b6d4
+                );
+
+            transform:
+                translateX(-50%);
+
+            transition:
+                width .25s ease;
+        }
+
+
+        .nav-links a:hover {
+
+            color: #1d4ed8;
+
+            background:
+                rgba(37, 99, 235, .055);
+
+            transform:
+                translateY(-1px);
+        }
+
+
+        .nav-links a:hover::after {
+
+            width: 18px;
+        }
+
+
+        /* =====================================================
+           NAV ACTIONS
+           ===================================================== */
+
+        .nav-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+
+        .nav-actions .btn {
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+
+        .nav-actions .btn::before {
+
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+            left: -120%;
+
+            width: 80%;
+            height: 100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255,255,255,.28),
+                    transparent
+                );
+
+            transform: skewX(-20deg);
+
+            transition:
+                left .55s ease;
+        }
+
+
+        .nav-actions .btn:hover::before {
+
+            left: 140%;
+        }
+
+
+        /* =====================================================
+           MOBILE NAV BUTTON
+           ===================================================== */
+
+        .mobile-menu-btn {
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            width: 40px;
+            height: 40px;
+
+            border:
+                1px solid #dbe2ea;
+
+            border-radius: 11px;
+
+            background: white;
+
+            color: #0f172a;
+
+            cursor: pointer;
+
+            transition: .2s;
+        }
+
+
+        .mobile-menu-btn:hover {
+
+            border-color: #93c5fd;
+
+            color: #2563eb;
+
+            transform:
+                translateY(-1px);
+        }
+
+
+        /* =====================================================
+           MOBILE MENU
+           ===================================================== */
+
+        .mobile-nav {
+
+            display: none;
+
+            max-width: 1440px;
+
+            margin: 10px auto 0;
+
+            padding: 10px;
+
+            border:
+                1px solid rgba(148, 163, 184, .18);
+
+            border-radius: 16px;
+
+            background:
+                rgba(255,255,255,.90);
+
+            box-shadow:
+                0 15px 35px rgba(15,23,42,.08);
+
+            backdrop-filter:
+                blur(20px);
+        }
+
+
+        .mobile-nav.open {
+
+            display: block;
+
+            animation:
+                mobileMenuIn .25s ease;
+        }
+
+
+        .mobile-nav a {
+
+            display: flex;
+
+            align-items: center;
+
+            padding: 12px 13px;
+
+            border-radius: 10px;
+
+            color: #334155;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            transition: .2s;
+        }
+
+
+        .mobile-nav a:hover {
+
+            background: #eff6ff;
+
+            color: #1d4ed8;
+
+            padding-left: 17px;
+        }
+
+
+        /* =====================================================
+           PAGE CONTENT
+           ===================================================== */
+
+        main,
+        .page-content {
+
+            position: relative;
+
+            animation:
+                pageEnter .55s ease both;
+        }
+
+
+        /* =====================================================
+           FLASH ALERT
+           ===================================================== */
+
+        .alert {
+
+            position: relative;
+
+            border-radius: 13px;
+
+            animation:
+                alertIn .35s ease both;
+        }
+
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        .site-footer {
+
+            position: relative;
+
+            margin-top: 70px;
+
+            padding:
+                52px 20px 24px;
+
+            overflow: hidden;
+
+            color: #cbd5e1;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #0b1220,
+                    #0f172a 55%,
+                    #111827
+                );
+        }
+
+
+        .site-footer::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 450px;
+            height: 450px;
+
+            right: -180px;
+            top: -300px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(37,99,235,.18),
+                    transparent 70%
+                );
+
+            pointer-events: none;
+        }
+
+
+        .site-footer::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            right: 0;
+            top: 0;
+
+            height: 1px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(96,165,250,.45),
+                    rgba(6,182,212,.45),
+                    transparent
+                );
+        }
+
+
+        .footer-grid {
+
+            position: relative;
+
+            z-index: 1;
+
+            max-width: 1440px;
+
+            margin: auto;
+
+            display: grid;
+
+            grid-template-columns:
+                2fr
+                1fr
+                1fr
+                1.2fr;
+
+            gap: 45px;
+        }
+
+
+        .site-footer .brand {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            color: white;
+
+            font-family:
+                "Space Grotesk",
+                sans-serif;
+
+            font-size: 14px;
+
+            font-weight: 700;
+        }
+
+
+        .site-footer p {
+
+            max-width: 330px;
+
+            margin-top: 15px;
+
+            color: #94a3b8;
+
+            font-size: 12px;
+
+            line-height: 1.7;
+        }
+
+
+        .site-footer h4 {
+
+            margin: 0 0 14px;
+
+            color: white;
+
+            font-family:
+                "Space Grotesk",
+                sans-serif;
+
+            font-size: 13px;
+        }
+
+
+        .footer-links {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 9px;
+
+            margin: 0;
+
+            padding: 0;
+
+            list-style: none;
+        }
+
+
+        .footer-links a {
+
+            display: inline-flex;
+
+            color: #94a3b8;
+
+            text-decoration: none;
+
+            font-size: 12px;
+
+            transition:
+                color .2s ease,
+                transform .2s ease;
+        }
+
+
+        .footer-links a:hover {
+
+            color: #60a5fa;
+
+            transform:
+                translateX(3px);
+        }
+
+
+        .footer-bottom {
+
+            position: relative;
+
+            z-index: 1;
+
+            max-width: 1440px;
+
+            margin:
+                40px auto 0;
+
+            padding-top: 18px;
+
+            border-top:
+                1px solid rgba(148,163,184,.12);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            color: #64748b;
+
+            font-size: 10px;
+        }
+
+
+        /* =====================================================
+           ANIMATIONS
+           ===================================================== */
+
+        @keyframes aiFloat {
+
+            0%, 100% {
+                transform:
+                    translate3d(0,0,0)
+                    scale(1);
+            }
+
+            50% {
+                transform:
+                    translate3d(20px,-25px,0)
+                    scale(1.04);
+            }
+        }
+
+
+        @keyframes particleFloat {
+
+            0%, 100% {
+                transform:
+                    translateY(0)
+                    scale(1);
+
+                opacity: .25;
+            }
+
+            50% {
+                transform:
+                    translateY(-22px)
+                    scale(1.5);
+
+                opacity: .8;
+            }
+        }
+
+
+        @keyframes logoGlow {
+
+            0% {
+                transform:
+                    translate(0,0);
+            }
+
+            50% {
+                transform:
+                    translate(70px,55px);
+            }
+
+            100% {
+                transform:
+                    translate(0,0);
+            }
+        }
+
+
+        @keyframes pageEnter {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(10px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        @keyframes alertIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(-8px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        @keyframes mobileMenuIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(-8px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        /* =====================================================
+           REDUCED MOTION
+           ===================================================== */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+
+                animation-duration: .01ms !important;
+
+                animation-iteration-count: 1 !important;
+
+                scroll-behavior: auto !important;
+
+                transition-duration: .01ms !important;
+            }
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 1050px) {
+
+            .nav-links {
+
+                gap: 0;
+            }
+
+            .nav-links a {
+
+                padding:
+                    8px 7px;
+
+                font-size: 11px;
+            }
+
+            .navbar .brand {
+
+                font-size: 12px;
+            }
+
+        }
+
+
+        @media (max-width: 850px) {
+
+            .nav-links,
+            .nav-actions {
+
+                display: none;
+            }
+
+            .mobile-menu-btn {
+
+                display: inline-flex;
+            }
+
+            .navbar-inner {
+
+                gap: 10px;
+            }
+
+            .footer-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+        }
+
+
+        @media (max-width: 600px) {
+
+            .navbar {
+
+                padding:
+                    10px 12px;
+            }
+
+            .navbar .brand {
+
+                font-size: 11px;
+            }
+
+            .brand-mark {
+
+                width: 35px;
+                height: 35px;
+
+                border-radius: 10px;
+            }
+
+            .footer-grid {
+
+                grid-template-columns:
+                    1fr;
+
+                gap: 28px;
+            }
+
+            .footer-bottom {
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                line-height: 1.6;
+            }
+
+            .site-footer {
+
+                margin-top: 45px;
+
+                padding-top: 38px;
+            }
+
+        }
+        
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         AI BACKGROUND
+         ===================================================== -->
+
+    <div class="ai-background">
+
+        <div class="ai-grid"></div>
+
+        <div class="ai-orb ai-orb-1"></div>
+
+        <div class="ai-orb ai-orb-2"></div>
+
+        <div class="ai-orb ai-orb-3"></div>
+
+
+        <div class="ai-particle particle-1"></div>
+        <div class="ai-particle particle-2"></div>
+        <div class="ai-particle particle-3"></div>
+        <div class="ai-particle particle-4"></div>
+        <div class="ai-particle particle-5"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SCROLL PROGRESS
+         ===================================================== -->
+
+    <div
+        class="scroll-progress"
+        id="scrollProgress"
+    ></div>
+
+
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
+
+    <nav
+        class="navbar"
+        id="mainNavbar"
+    >
+
+        <div class="navbar-inner">
+
+
+            <!-- BRAND -->
+
+            <a
+                href="{{ url_for('index') }}"
+                class="brand"
+            >
+
+                <span class="brand-mark">
+                    PA
+                </span>
+
+                <span>
+                    Passport Automation System
+                </span>
+
+            </a>
+
+
+            <!-- DESKTOP NAV -->
+
+            <div class="nav-links">
+
+                <a href="{{ url_for('index') }}">
+                    Home
+                </a>
+
+                <a href="{{ url_for('index') }}#services">
+                    Services
+                </a>
+
+                <a href="{{ url_for('index') }}#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="{{ url_for('track_page') }}">
+                    Track Application
+                </a>
+
+                <a href="{{ url_for('index') }}#faq">
+                    FAQ
+                </a>
+
+
+                {% if current_user %}
+
+                    <a
+                        href="{{
+                            url_for('dashboard')
+                            if current_user['role'] == 'user'
+                            else url_for('admin_dashboard')
+                        }}"
+                    >
+                        Dashboard
+                    </a>
+
+                {% else %}
+
+                    <a href="{{ url_for('login') }}">
+                        Login
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- DESKTOP ACTION -->
+
+            <div class="nav-actions">
+
+                {% if current_user %}
+
+                    <a
+                        href="{{
+                            url_for('dashboard')
+                            if current_user['role'] == 'user'
+                            else url_for('admin_dashboard')
+                        }}"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Go to Dashboard
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{{ url_for('official_login') }}"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Official Login
+                    </a>
+
+                    <a
+                        href="{{ url_for('register') }}"
+                        class="btn btn-primary btn-sm"
+                    >
+                        Apply for Passport
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- MOBILE MENU BUTTON -->
+
+            <button
+                type="button"
+                class="mobile-menu-btn"
+                id="mobileMenuBtn"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+            >
+
+                <svg
+                    id="menuIcon"
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                >
+
+                    <path d="M4 6h16"/>
+                    <path d="M4 12h16"/>
+                    <path d="M4 18h16"/>
+
+                </svg>
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             MOBILE NAV
+             ================================================= -->
+
+        <div
+            class="mobile-nav"
+            id="mobileNav"
+        >
+
+            <a href="{{ url_for('index') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('index') }}#services">
+                Services
+            </a>
+
+            <a href="{{ url_for('index') }}#how-it-works">
+                How It Works
+            </a>
+
+            <a href="{{ url_for('track_page') }}">
+                Track Application
+            </a>
+
+            <a href="{{ url_for('index') }}#faq">
+                FAQ
+            </a>
+
+
+            {% if current_user %}
+
+                <a
+                    href="{{
+                        url_for('dashboard')
+                        if current_user['role'] == 'user'
+                        else url_for('admin_dashboard')
+                    }}"
+                >
+                    Dashboard
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">
+                    User Login
+                </a>
+
+                <a href="{{ url_for('official_login') }}">
+                    Official Login
+                </a>
+
+                <a href="{{ url_for('register') }}">
+                    Apply for Passport
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         FLASH MESSAGES
+         ===================================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div
+                class="container"
+                style="padding-top:20px;"
+            >
+
+                {% for category, message in messages %}
+
+                    <div
+                        class="
+                            alert
+                            {{
+                                'alert-error'
+                                if category == 'error'
+                                else 'alert-success'
+                            }}
+                        "
+                    >
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <main>
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="site-footer">
+
+        <div class="container">
+
+            <div class="footer-grid">
+
+
+                <!-- BRAND -->
+
+                <div>
+
+                    <div class="brand">
+
+                        <span class="brand-mark">
+                            PA
+                        </span>
+
+                        Passport Automation System
+
+                    </div>
+
+                    <p>
+                        Making passport services simpler,
+                        faster, and more transparent through
+                        modern digital automation.
+                    </p>
+
+                </div>
+
+
+                <!-- COMPANY -->
+
+                <div>
+
+                    <h4>
+                        Company
+                    </h4>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="{{ url_for('index') }}">
+                                Home
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url_for('index') }}#services">
+                                Services
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url_for('index') }}#faq">
+                                FAQ
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <!-- SERVICES -->
+
+                <div>
+
+                    <h4>
+                        Services
+                    </h4>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="{{ url_for('track_page') }}">
+                                Track Application
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url_for('register') }}">
+                                Apply Online
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ url_for('login') }}">
+                                User Login
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <!-- OFFICIAL -->
+
+                <div>
+
+                    <h4>
+                        Official Portal
+                    </h4>
+
+                    <ul class="footer-links">
+
+                        <li>
+                            <a href="{{ url_for('official_login') }}">
+                                Officer Login
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Privacy Policy
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#">
+                                Terms & Conditions
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER BOTTOM -->
+
+            <div class="footer-bottom">
+
+                <span>
+                    © {{ current_year }}
+                    Passport Automation System
+                </span>
+
+                <span>
+                    Demo platform — not affiliated with
+                    any government agency
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+         MAIN JS
+         ===================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/main.js') }}"
+    ></script>
+
+
+    <!-- =====================================================
+         BASE PAGE JS
+         ===================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                /* ==========================================
+                   MOBILE MENU
+                   ========================================== */
+
+                const mobileButton =
+                    document.getElementById(
+                        "mobileMenuBtn"
+                    );
+
+                const mobileNav =
+                    document.getElementById(
+                        "mobileNav"
+                    );
+
+                const menuIcon =
+                    document.getElementById(
+                        "menuIcon"
+                    );
+
+
+                if (
+                    mobileButton &&
+                    mobileNav
+                ) {
+
+                    mobileButton.addEventListener(
+                        "click",
+                        function () {
+
+                            const isOpen =
+                                mobileNav.classList.toggle(
+                                    "open"
+                                );
+
+                            mobileButton.setAttribute(
+                                "aria-expanded",
+                                isOpen
+                            );
+
+
+                            if (isOpen) {
+
+                                menuIcon.innerHTML = `
+                                    <path d="M6 6l12 12"/>
+                                    <path d="M18 6L6 18"/>
+                                `;
+
+                            } else {
+
+                                menuIcon.innerHTML = `
+                                    <path d="M4 6h16"/>
+                                    <path d="M4 12h16"/>
+                                    <path d="M4 18h16"/>
+                                `;
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                /* ==========================================
+                   CLOSE MOBILE MENU AFTER CLICK
+                   ========================================== */
+
+                document
+                    .querySelectorAll(
+                        "#mobileNav a"
+                    )
+                    .forEach(function (link) {
+
+                        link.addEventListener(
+                            "click",
+                            function () {
+
+                                if (mobileNav) {
+
+                                    mobileNav.classList.remove(
+                                        "open"
+                                    );
+
+                                }
+
+                                if (mobileButton) {
+
+                                    mobileButton.setAttribute(
+                                        "aria-expanded",
+                                        "false"
+                                    );
+
+                                }
+
+                                if (menuIcon) {
+
+                                    menuIcon.innerHTML = `
+                                        <path d="M4 6h16"/>
+                                        <path d="M4 12h16"/>
+                                        <path d="M4 18h16"/>
+                                    `;
+
+                                }
+
+                            }
+                        );
+
+                    });
+
+
+                /* ==========================================
+                   NAVBAR SCROLL EFFECT
+                   ========================================== */
+
+                const navbar =
+                    document.getElementById(
+                        "mainNavbar"
+                    );
+
+
+                function updateNavbar() {
+
+                    if (!navbar) {
+                        return;
+                    }
+
+                    if (window.scrollY > 20) {
+
+                        navbar.classList.add(
+                            "scrolled"
+                        );
+
+                    } else {
+
+                        navbar.classList.remove(
+                            "scrolled"
+                        );
+
+                    }
+
+                }
+
+
+                window.addEventListener(
+                    "scroll",
+                    updateNavbar,
+                    {
+                        passive: true
+                    }
+                );
+
+                updateNavbar();
+
+
+                /* ==========================================
+                   SCROLL PROGRESS
+                   ========================================== */
+
+                const progress =
+                    document.getElementById(
+                        "scrollProgress"
+                    );
+
+
+                function updateProgress() {
+
+                    if (!progress) {
+                        return;
+                    }
+
+                    const scrollTop =
+                        window.scrollY;
+
+                    const documentHeight =
+                        document.documentElement
+                            .scrollHeight
+                        - window.innerHeight;
+
+                    if (documentHeight <= 0) {
+
+                        progress.style.width = "0%";
+
+                        return;
+
+                    }
+
+                    const percentage =
+                        (
+                            scrollTop /
+                            documentHeight
+                        ) * 100;
+
+                    progress.style.width =
+                        Math.min(
+                            percentage,
+                            100
+                        ) + "%";
+
+                }
+
+
+                window.addEventListener(
+                    "scroll",
+                    updateProgress,
+                    {
+                        passive: true
+                    }
+                );
+
+                updateProgress();
+
+
+                /* ==========================================
+                   ESCAPE KEY CLOSES MOBILE MENU
+                   ========================================== */
+
+                document.addEventListener(
+                    "keydown",
+                    function (event) {
+
+                        if (
+                            event.key === "Escape" &&
+                            mobileNav &&
+                            mobileNav.classList.contains("open")
+                        ) {
+
+                            mobileNav.classList.remove(
+                                "open"
+                            );
+
+                            if (mobileButton) {
+
+                                mobileButton.setAttribute(
+                                    "aria-expanded",
+                                    "false"
+                                );
+
+                            }
+
+                            if (menuIcon) {
+
+                                menuIcon.innerHTML = `
+                                    <path d="M4 6h16"/>
+                                    <path d="M4 12h16"/>
+                                    <path d="M4 18h16"/>
+                                `;
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    </script>
+
+
+    {% block scripts %}{% endblock %}
+
+
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block title %}Documents — Admin{% endblock %}
+{% block content %}
+
+<h1 class="greeting">Documents</h1>
+<p class="greeting-sub">All documents uploaded across applications.</p>
+
+<div class="table-card">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr><th>Application ID</th><th>Applicant</th><th>Document Type</th><th>File</th><th>Status</th><th>Uploaded</th></tr>
+      </thead>
+      <tbody>
+        {% for d in documents %}
+        <tr>
+          <td class="mono">{{ d['application_id'] }}</td>
+          <td>{{ d['full_name'] }}</td>
+          <td style="text-transform:capitalize;">{{ d['doc_type'].replace('_',' ') }}</td>
+          <td>{{ d['original_name'] }}</td>
+          <td>{% if d['verified'] %}<span class="chip chip-success">Verified</span>{% else %}<span class="chip chip-warning">Pending</span>{% endif %}</td>
+          <td>{{ d['uploaded_at'][:10] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state">No documents uploaded yet.</div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

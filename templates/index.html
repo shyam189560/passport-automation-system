@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Passport Automation System — Your Passport Journey, Simplified{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow-pill"><span class="dot"></span> Now processing applications online</span>
+      <h1>Your Passport Journey, Simplified.</h1>
+      <p class="hero-sub">Apply, upload documents, schedule appointments, and track your passport application — all in one place.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('register') if not current_user else url_for('application_form') }}" class="btn btn-primary">Start Application</a>
+        <a href="{{ url_for('track_page') }}" class="btn btn-secondary">Track Application</a>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 3v6c0 5-3.4 8.4-7 11-3.6-2.6-7-6-7-11V5l7-3z"/></svg> Secure Document Processing</div>
+        <div class="trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg> Application Tracking</div>
+        <div class="trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Online Appointment</div>
+        <div class="trust-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg> Fast &amp; Transparent Process</div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="passport-card">
+        <div class="passport-card-top">
+          <div class="passport-chip"></div>
+          <span class="status-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Verified</span>
+        </div>
+        <div class="line w-45" style="height:14px;margin-bottom:14px;"></div>
+        <div class="line w-90"></div>
+        <div class="line w-70"></div>
+        <div class="line w-45"></div>
+      </div>
+      <div class="float-card top-right">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Documents Verified
+      </div>
+      <div class="float-card bottom-left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Appointment Confirmed
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="services">
+  <div class="container">
+    <div class="section-head">
+      <h2>Everything You Need in One Place</h2>
+      <p>From your first application to the day your passport arrives, every step lives on a single dashboard.</p>
+    </div>
+    <div class="grid grid-3">
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 3v6c0 5-3.4 8.4-7 11-3.6-2.6-7-6-7-11V5l7-3z"/></svg></div>
+        <h3>New Passport</h3>
+        <p>Apply for a new passport online.</p>
+      </div>
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10a8 8 0 00-14.9-3M4 14a8 8 0 0014.9 3"/></svg></div>
+        <h3>Passport Renewal</h3>
+        <p>Renew your existing passport easily.</p>
+      </div>
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></div>
+        <h3>Document Verification</h3>
+        <p>Upload and verify required documents.</p>
+      </div>
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></div>
+        <h3>Appointment Booking</h3>
+        <p>Select a convenient appointment slot.</p>
+      </div>
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Application Tracking</h3>
+        <p>Track your application status in real time.</p>
+      </div>
+      <div class="card service-card">
+        <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div>
+        <h3>Application History</h3>
+        <p>View previous applications and their status.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how-it-works" style="background:var(--white); border-top:1px solid var(--border-soft); border-bottom:1px solid var(--border-soft);">
+  <div class="container">
+    <div class="section-head">
+      <h2>How It Works</h2>
+      <p>Four simple steps to get your passport moving.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <h3>Create Account</h3>
+        <p>Sign up in under a minute.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <h3>Fill Application</h3>
+        <p>Enter your personal and address details.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <h3>Upload Documents</h3>
+        <p>Submit identity and address proofs.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04</div>
+        <h3>Track &amp; Complete</h3>
+        <p>Book your appointment and follow progress.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <h2>Frequently Asked Questions</h2>
+      <p>Quick answers to common questions about the process.</p>
+    </div>
+    <div class="grid grid-2" style="max-width:900px;margin:0 auto;">
+      <div class="card">
+        <h3 style="font-size:1rem;">How long does processing take?</h3>
+        <p style="margin:0;font-size:0.9rem;">Most applications move from submission to dispatch within 3–4 weeks, depending on verification and appointment availability.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;">What documents do I need?</h3>
+        <p style="margin:0;font-size:0.9rem;">You'll need identity proof, address proof, date of birth proof, a photograph, and a signature scan.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;">Can I track my application without an account?</h3>
+        <p style="margin:0;font-size:0.9rem;">Yes — use the Track Application page with your Application ID at any time.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1rem;">How do I change my appointment?</h3>
+        <p style="margin:0;font-size:0.9rem;">Open your dashboard and book a new slot — it will automatically replace your existing appointment.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
