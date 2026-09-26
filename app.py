@@ -3,38 +3,73 @@ Passport Automation System
 A full-stack demo web application for passport applications, document upload,
 appointment scheduling, application tracking, and an admin back-office.
 
-Run with:  python app.py
+Run with: python app.py
 Then visit http://127.0.0.1:5000
 """
 
 import os
 import sqlite3
 import random
+import io
+
 from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import (
-    Flask, render_template, request, redirect, url_for,
-    session, jsonify, g, flash, send_file
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    jsonify,
+    g,
+    flash,
+    send_file,
 )
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-import io
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database.db")
-UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
+# --------------------------------------------------------------------------
+# Configuration
+# --------------------------------------------------------------------------
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB_PATH = os.path.join(
+    BASE_DIR,
+    "database.db"
+)
+
+UPLOAD_DIR = os.path.join(
+    BASE_DIR,
+    "static",
+    "uploads"
+)
+
+os.makedirs(
+    UPLOAD_DIR,
+    exist_ok=True
+)
 
 app = Flask(__name__)
-app.secret_key = "passport-automation-system-demo-secret-key"
+
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "passport-automation-system-demo-secret-key"
+)
+
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
 
+
+# --------------------------------------------------------------------------
+# Constants
+# --------------------------------------------------------------------------
 
 TRACKING_STAGES = [
     "Application Submitted",
@@ -87,26 +122,51 @@ TIME_SLOTS = [
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DB_PATH)
+        g.db = sqlite3.connect(
+            DB_PATH,
+            timeout=30
+        )
+
         g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA foreign_keys = ON")
+
+        g.db.execute(
+            "PRAGMA foreign_keys = ON"
+        )
+
     return g.db
 
 
 @app.teardown_appcontext
 def close_db(exception=None):
-    db = g.pop("db", None)
+    db = g.pop(
+        "db",
+        None
+    )
+
     if db is not None:
         db.close()
 
 
 def init_db(reset=False):
+
+    # Delete old database when reset is requested
     if reset and os.path.exists(DB_PATH):
         os.remove(DB_PATH)
 
     first_run = not os.path.exists(DB_PATH)
 
-    db = sqlite3.connect(DB_PATH)
+    db = sqlite3.connect(
+        DB_PATH,
+        timeout=30
+    )
+
+    db.execute(
+        "PRAGMA foreign_keys = ON"
+    )
+
+    # ----------------------------------------------------------------------
+    # Create tables
+    # ----------------------------------------------------------------------
 
     db.executescript(
         """
@@ -140,7 +200,8 @@ def init_db(reset=False):
             step_completed INTEGER NOT NULL DEFAULT 1,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
+            FOREIGN KEY (user_id)
+                REFERENCES users (id)
         );
 
         CREATE TABLE IF NOT EXISTS documents (
@@ -174,25 +235,85 @@ def init_db(reset=False):
             message TEXT NOT NULL,
             is_read INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users (id)
+            FOREIGN KEY (user_id)
+                REFERENCES users (id)
         );
         """
     )
 
     db.commit()
 
-    if first_run or reset:
+    # ----------------------------------------------------------------------
+    # IMPORTANT:
+    # Render may have a database file that exists but contains no users.
+    # Seed demo data only when the database is empty.
+    # ----------------------------------------------------------------------
+
+    user_count = db.execute(
+        "SELECT COUNT(*) FROM users"
+    ).fetchone()[0]
+
+    if first_run or reset or user_count == 0:
+
         seed_demo_data(db)
+
+    else:
+
+        # Make sure admin account exists
+        admin_exists = db.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE email = ?
+            AND role = 'admin'
+            """,
+            ("admin@passport.gov",)
+        ).fetchone()
+
+        if not admin_exists:
+
+            db.execute(
+                """
+                INSERT INTO users
+                (
+                    full_name,
+                    email,
+                    phone,
+                    password_hash,
+                    role,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, 'admin', ?)
+                """,
+                (
+                    "System Administrator",
+                    "admin@passport.gov",
+                    "9999999999",
+                    generate_password_hash("admin1234"),
+                    now_iso(),
+                ),
+            )
+
+            db.commit()
 
     db.close()
 
 
 def gen_application_id(db):
+
     while True:
-        candidate = f"PAS-2026-{random.randint(100000, 999999)}"
+
+        candidate = (
+            f"PAS-2026-"
+            f"{random.randint(100000, 999999)}"
+        )
 
         exists = db.execute(
-            "SELECT 1 FROM applications WHERE application_id = ?",
+            """
+            SELECT 1
+            FROM applications
+            WHERE application_id = ?
+            """,
             (candidate,)
         ).fetchone()
 
@@ -201,29 +322,59 @@ def gen_application_id(db):
 
 
 def now_iso():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
 
-def add_notification(db, user_id, title, message):
+def add_notification(
+    db,
+    user_id,
+    title,
+    message
+):
+
     db.execute(
         """
         INSERT INTO notifications
-        (user_id, title, message, created_at)
+        (
+            user_id,
+            title,
+            message,
+            created_at
+        )
         VALUES (?, ?, ?, ?)
         """,
-        (user_id, title, message, now_iso()),
+        (
+            user_id,
+            title,
+            message,
+            now_iso()
+        ),
     )
 
 
 def seed_demo_data(db):
 
+    # ----------------------------------------------------------------------
     # Demo user
-    pw = generate_password_hash("demo1234")
+    # ----------------------------------------------------------------------
+
+    pw = generate_password_hash(
+        "demo1234"
+    )
 
     cur = db.execute(
         """
         INSERT INTO users
-        (full_name, email, phone, password_hash, role, created_at)
+        (
+            full_name,
+            email,
+            phone,
+            password_hash,
+            role,
+            created_at
+        )
         VALUES (?, ?, ?, ?, 'user', ?)
         """,
         (
@@ -237,13 +388,25 @@ def seed_demo_data(db):
 
     user_id = cur.lastrowid
 
+    # ----------------------------------------------------------------------
     # Demo admin
-    admin_pw = generate_password_hash("admin1234")
+    # ----------------------------------------------------------------------
+
+    admin_pw = generate_password_hash(
+        "admin1234"
+    )
 
     db.execute(
         """
         INSERT INTO users
-        (full_name, email, phone, password_hash, role, created_at)
+        (
+            full_name,
+            email,
+            phone,
+            password_hash,
+            role,
+            created_at
+        )
         VALUES (?, ?, ?, ?, 'admin', ?)
         """,
         (
@@ -255,7 +418,10 @@ def seed_demo_data(db):
         ),
     )
 
+    # ----------------------------------------------------------------------
     # Demo application
+    # ----------------------------------------------------------------------
+
     app_id = "PAS-2026-001245"
 
     db.execute(
@@ -305,7 +471,12 @@ def seed_demo_data(db):
         ),
     )
 
+    # ----------------------------------------------------------------------
+    # Demo documents
+    # ----------------------------------------------------------------------
+
     for doc_type, _ in DOCUMENT_TYPES:
+
         db.execute(
             """
             INSERT INTO documents
@@ -329,6 +500,10 @@ def seed_demo_data(db):
             ),
         )
 
+    # ----------------------------------------------------------------------
+    # Demo appointment
+    # ----------------------------------------------------------------------
+
     db.execute(
         """
         INSERT INTO appointments
@@ -345,34 +520,53 @@ def seed_demo_data(db):
         (
             app_id,
             PASSPORT_OFFICES[0],
-            (datetime.now() + timedelta(days=5)).strftime("%Y-%m-%d"),
+            (
+                datetime.now()
+                + timedelta(days=5)
+            ).strftime("%Y-%m-%d"),
             "11:00 AM",
             now_iso(),
+        ),
+    )
+
+    # ----------------------------------------------------------------------
+    # Demo notifications
+    # ----------------------------------------------------------------------
+
+    add_notification(
+        db,
+        user_id,
+        "Application submitted",
+        (
+            f"Your application {app_id} "
+            "has been submitted successfully."
         ),
     )
 
     add_notification(
         db,
         user_id,
-        "Application submitted",
-        f"Your application {app_id} has been submitted successfully.",
-    )
-
-    add_notification(
-        db,
-        user_id,
         "Documents uploaded",
-        "All required documents were received and are under review.",
+        (
+            "All required documents were received "
+            "and are under review."
+        ),
     )
 
     add_notification(
         db,
         user_id,
         "Appointment confirmed",
-        "Your passport office appointment has been confirmed for next week.",
+        (
+            "Your passport office appointment "
+            "has been confirmed for next week."
+        ),
     )
 
+    # ----------------------------------------------------------------------
     # Extra demo applications
+    # ----------------------------------------------------------------------
+
     sample_names = [
         ("Priya Nair", "Kochi", "Kerala"),
         ("Rohan Mehta", "Pune", "Maharashtra"),
@@ -394,19 +588,31 @@ def seed_demo_data(db):
         "Document Verification",
     ]
 
-    for i, (name, city, state) in enumerate(sample_names):
+    for i, (name, city, state) in enumerate(
+        sample_names
+    ):
 
         email = (
-            name.lower().replace(" ", ".")
+            name.lower()
+            .replace(" ", ".")
             + "@example.com"
         )
 
-        pw2 = generate_password_hash("demo1234")
+        pw2 = generate_password_hash(
+            "demo1234"
+        )
 
         cur2 = db.execute(
             """
             INSERT INTO users
-            (full_name, email, phone, password_hash, role, created_at)
+            (
+                full_name,
+                email,
+                phone,
+                password_hash,
+                role,
+                created_at
+            )
             VALUES (?, ?, ?, ?, 'user', ?)
             """,
             (
@@ -422,7 +628,9 @@ def seed_demo_data(db):
 
         aid = gen_application_id(db)
 
-        status = statuses[i % len(statuses)]
+        status = statuses[
+            i % len(statuses)
+        ]
 
         progress = {
             "Application Submitted": 12,
@@ -435,8 +643,12 @@ def seed_demo_data(db):
 
         created = (
             datetime.now()
-            - timedelta(days=random.randint(1, 60))
-        ).strftime("%Y-%m-%d %H:%M:%S")
+            - timedelta(
+                days=random.randint(1, 60)
+            )
+        ).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         db.execute(
             """
@@ -503,6 +715,7 @@ def login_required(view):
     def wrapped(*args, **kwargs):
 
         if not session.get("user_id"):
+
             return redirect(
                 url_for(
                     "login",
@@ -510,7 +723,10 @@ def login_required(view):
                 )
             )
 
-        return view(*args, **kwargs)
+        return view(
+            *args,
+            **kwargs
+        )
 
     return wrapped
 
@@ -521,6 +737,7 @@ def admin_required(view):
     def wrapped(*args, **kwargs):
 
         if not session.get("user_id"):
+
             return redirect(
                 url_for(
                     "login",
@@ -529,11 +746,15 @@ def admin_required(view):
             )
 
         if session.get("role") != "admin":
+
             return redirect(
                 url_for("dashboard")
             )
 
-        return view(*args, **kwargs)
+        return view(
+            *args,
+            **kwargs
+        )
 
     return wrapped
 
@@ -546,7 +767,11 @@ def current_user():
     db = get_db()
 
     return db.execute(
-        "SELECT * FROM users WHERE id = ?",
+        """
+        SELECT *
+        FROM users
+        WHERE id = ?
+        """,
         (session["user_id"],)
     ).fetchone()
 
@@ -566,18 +791,25 @@ def inject_globals():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html"
+    )
 
 
 @app.route("/faq")
 def faq():
+
     return render_template(
         "index.html",
         scroll_to="faq"
     )
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
 def register():
 
     if request.method == "POST":
@@ -604,7 +836,11 @@ def register():
             ""
         )
 
-        if not full_name or not email or not password:
+        if (
+            not full_name
+            or not email
+            or not password
+        ):
 
             flash(
                 "Please fill in all required fields.",
@@ -616,7 +852,11 @@ def register():
             )
 
         existing = db.execute(
-            "SELECT id FROM users WHERE email = ?",
+            """
+            SELECT id
+            FROM users
+            WHERE email = ?
+            """,
             (email,)
         ).fetchone()
 
@@ -677,7 +917,10 @@ def register():
     )
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
     if request.method == "POST":
@@ -695,7 +938,11 @@ def login():
         )
 
         user = db.execute(
-            "SELECT * FROM users WHERE email = ?",
+            """
+            SELECT *
+            FROM users
+            WHERE email = ?
+            """,
             (email,)
         ).fetchone()
 
@@ -709,8 +956,11 @@ def login():
             session["full_name"] = user["full_name"]
 
             if user["role"] == "admin":
+
                 return redirect(
-                    url_for("admin_dashboard")
+                    url_for(
+                        "admin_dashboard"
+                    )
                 )
 
             return redirect(
@@ -738,11 +988,14 @@ def logout():
     )
 
 
-# ============================================================
-# OFFICIAL / ADMIN LOGIN
-# ============================================================
+# --------------------------------------------------------------------------
+# Official / Admin Login
+# --------------------------------------------------------------------------
 
-@app.route("/official-login", methods=["GET", "POST"])
+@app.route(
+    "/official-login",
+    methods=["GET", "POST"]
+)
 def official_login():
 
     if request.method == "POST":
@@ -771,7 +1024,11 @@ def official_login():
             )
 
         user = db.execute(
-            "SELECT * FROM users WHERE email = ?",
+            """
+            SELECT *
+            FROM users
+            WHERE email = ?
+            """,
             (email,)
         ).fetchone()
 
@@ -810,7 +1067,9 @@ def official_login():
         )
 
         return redirect(
-            url_for("admin_dashboard")
+            url_for(
+                "admin_dashboard"
+            )
         )
 
     return render_template(
@@ -819,7 +1078,7 @@ def official_login():
 
 
 # --------------------------------------------------------------------------
-# User dashboard & application flow
+# User dashboard
 # --------------------------------------------------------------------------
 
 @app.route("/dashboard")
@@ -827,6 +1086,7 @@ def official_login():
 def dashboard():
 
     db = get_db()
+
     user = current_user()
 
     application = db.execute(
@@ -841,6 +1101,7 @@ def dashboard():
     ).fetchone()
 
     documents = []
+
     appointment = None
 
     if application:
@@ -851,7 +1112,9 @@ def dashboard():
             FROM documents
             WHERE application_id = ?
             """,
-            (application["application_id"],),
+            (
+                application["application_id"],
+            ),
         ).fetchall()
 
         appointment = db.execute(
@@ -862,7 +1125,9 @@ def dashboard():
             ORDER BY id DESC
             LIMIT 1
             """,
-            (application["application_id"],),
+            (
+                application["application_id"],
+            ),
         ).fetchone()
 
     notifications = db.execute(
@@ -877,7 +1142,8 @@ def dashboard():
     ).fetchall()
 
     docs_verified = sum(
-        1 for d in documents
+        1
+        for d in documents
         if d["verified"]
     )
 
@@ -892,11 +1158,19 @@ def dashboard():
     )
 
 
-@app.route("/application", methods=["GET"])
+# --------------------------------------------------------------------------
+# Application
+# --------------------------------------------------------------------------
+
+@app.route(
+    "/application",
+    methods=["GET"]
+)
 @login_required
 def application_form():
 
     db = get_db()
+
     user = current_user()
 
     application = db.execute(
@@ -920,7 +1194,9 @@ def application_form():
             FROM documents
             WHERE application_id = ?
             """,
-            (application["application_id"],)
+            (
+                application["application_id"],
+            )
         ).fetchall():
 
             documents[d["doc_type"]] = d
@@ -933,17 +1209,26 @@ def application_form():
     )
 
 
-@app.route("/api/application/save-step", methods=["POST"])
+@app.route(
+    "/api/application/save-step",
+    methods=["POST"]
+)
 @login_required
 def api_save_step():
 
     db = get_db()
+
     user = current_user()
 
-    data = request.get_json(force=True)
+    data = request.get_json(
+        force=True
+    )
 
     step = int(
-        data.get("step", 1)
+        data.get(
+            "step",
+            1
+        )
     )
 
     application = db.execute(
@@ -959,7 +1244,9 @@ def api_save_step():
 
     if not application:
 
-        app_id = gen_application_id(db)
+        app_id = gen_application_id(
+            db
+        )
 
         db.execute(
             """
@@ -1003,7 +1290,9 @@ def api_save_step():
             (app_id,)
         ).fetchone()
 
-    app_id = application["application_id"]
+    app_id = application[
+        "application_id"
+    ]
 
     fields = {}
 
@@ -1075,11 +1364,15 @@ def api_save_step():
     )
 
 
-@app.route("/api/application/upload-document", methods=["POST"])
+@app.route(
+    "/api/application/upload-document",
+    methods=["POST"]
+)
 @login_required
 def api_upload_document():
 
     db = get_db()
+
     user = current_user()
 
     doc_type = request.form.get(
@@ -1113,7 +1406,10 @@ def api_upload_document():
         "file"
     )
 
-    if not file or file.filename == "":
+    if (
+        not file
+        or file.filename == ""
+    ):
 
         return jsonify(
             {
@@ -1122,7 +1418,9 @@ def api_upload_document():
             }
         ), 400
 
-    app_id = application["application_id"]
+    app_id = application[
+        "application_id"
+    ]
 
     ext = (
         os.path.splitext(
@@ -1203,11 +1501,15 @@ def api_upload_document():
     )
 
 
-@app.route("/api/application/remove-document", methods=["POST"])
+@app.route(
+    "/api/application/remove-document",
+    methods=["POST"]
+)
 @login_required
 def api_remove_document():
 
     db = get_db()
+
     user = current_user()
 
     doc_type = request.get_json(
@@ -1234,7 +1536,9 @@ def api_remove_document():
             AND doc_type = ?
             """,
             (
-                application["application_id"],
+                application[
+                    "application_id"
+                ],
                 doc_type,
             ),
         )
@@ -1248,11 +1552,15 @@ def api_remove_document():
     )
 
 
-@app.route("/api/application/submit", methods=["POST"])
+@app.route(
+    "/api/application/submit",
+    methods=["POST"]
+)
 @login_required
 def api_submit_application():
 
     db = get_db()
+
     user = current_user()
 
     application = db.execute(
@@ -1275,7 +1583,9 @@ def api_submit_application():
             }
         ), 400
 
-    app_id = application["application_id"]
+    app_id = application[
+        "application_id"
+    ]
 
     db.execute(
         """
@@ -1297,7 +1607,10 @@ def api_submit_application():
         db,
         user["id"],
         "Application submitted",
-        f"Your application {app_id} has been submitted and is now under review.",
+        (
+            f"Your application {app_id} "
+            "has been submitted and is now under review."
+        ),
     )
 
     db.commit()
@@ -1311,16 +1624,24 @@ def api_submit_application():
 
 
 # --------------------------------------------------------------------------
-# Receipt download
+# Receipt
 # --------------------------------------------------------------------------
 
-@app.route("/api/application/<application_id>/receipt")
+@app.route(
+    "/api/application/<application_id>/receipt"
+)
 @login_required
-def download_application_receipt(application_id):
+def download_application_receipt(
+    application_id
+):
 
     db = get_db()
 
-    application_id = application_id.strip().upper()
+    application_id = (
+        application_id
+        .strip()
+        .upper()
+    )
 
     application = db.execute(
         """
@@ -1354,10 +1675,12 @@ def download_application_receipt(application_id):
     width, height = A4
 
     left = 50
+
     y = height - 60
 
     pdf.setTitle(
-        f"Passport Receipt - {application['application_id']}"
+        f"Passport Receipt - "
+        f"{application['application_id']}"
     )
 
     pdf.setFont(
@@ -1411,41 +1734,57 @@ def download_application_receipt(application_id):
     details = [
         (
             "Application ID",
-            application["application_id"]
+            application[
+                "application_id"
+            ]
         ),
         (
             "Applicant Name",
-            application["full_name"]
+            application[
+                "full_name"
+            ]
         ),
         (
             "Email",
-            application["email"]
+            application[
+                "email"
+            ]
         ),
         (
             "Mobile",
-            application["mobile"]
+            application[
+                "mobile"
+            ]
         ),
         (
             "Passport Type",
-            application["passport_type"]
-            or "New Passport"
+            application[
+                "passport_type"
+            ] or "New Passport"
         ),
         (
             "Application Status",
-            application["status"]
+            application[
+                "status"
+            ]
         ),
         (
             "Payment Status",
-            application["payment_status"]
-            or "Pending"
+            application[
+                "payment_status"
+            ] or "Pending"
         ),
         (
             "Application Date",
-            application["created_at"]
+            application[
+                "created_at"
+            ]
         ),
         (
             "Last Updated",
-            application["updated_at"]
+            application[
+                "updated_at"
+            ]
         ),
     ]
 
@@ -1487,7 +1826,9 @@ def download_application_receipt(application_id):
     y -= 30
 
     payment_status = (
-        application["payment_status"]
+        application[
+            "payment_status"
+        ]
         or "Pending"
     )
 
@@ -1557,12 +1898,15 @@ def download_application_receipt(application_id):
 
 @app.route("/track")
 def track_page():
+
     return render_template(
         "tracking.html"
     )
 
 
-@app.route("/api/track/<application_id>")
+@app.route(
+    "/api/track/<application_id>"
+)
 def api_track(application_id):
 
     db = get_db()
@@ -1573,7 +1917,10 @@ def api_track(application_id):
         .upper()
     )
 
-    if application_id.startswith("2026-"):
+    if application_id.startswith(
+        "2026-"
+    ):
+
         application_id = (
             "PAS-" + application_id
         )
@@ -1598,8 +1945,10 @@ def api_track(application_id):
 
     if application["status"] in TRACKING_STAGES:
 
-        current_index = TRACKING_STAGES.index(
-            application["status"]
+        current_index = (
+            TRACKING_STAGES.index(
+                application["status"]
+            )
         )
 
     else:
@@ -1621,17 +1970,29 @@ def api_track(application_id):
         {
             "ok": True,
             "application_id":
-                application["application_id"],
+                application[
+                    "application_id"
+                ],
             "full_name":
-                application["full_name"],
+                application[
+                    "full_name"
+                ],
             "status":
-                application["status"],
+                application[
+                    "status"
+                ],
             "progress":
-                application["progress"],
+                application[
+                    "progress"
+                ],
             "passport_type":
-                application["passport_type"],
+                application[
+                    "passport_type"
+                ],
             "updated_at":
-                application["updated_at"],
+                application[
+                    "updated_at"
+                ],
             "stages":
                 stages,
         }
@@ -1647,6 +2008,7 @@ def api_track(application_id):
 def appointment_page():
 
     db = get_db()
+
     user = current_user()
 
     application = db.execute(
@@ -1672,7 +2034,11 @@ def appointment_page():
             ORDER BY id DESC
             LIMIT 1
             """,
-            (application["application_id"],),
+            (
+                application[
+                    "application_id"
+                ],
+            ),
         ).fetchone()
 
     dates = [
@@ -1706,11 +2072,15 @@ def appointment_page():
     )
 
 
-@app.route("/api/appointment/book", methods=["POST"])
+@app.route(
+    "/api/appointment/book",
+    methods=["POST"]
+)
 @login_required
 def api_book_appointment():
 
     db = get_db()
+
     user = current_user()
 
     data = request.get_json(
@@ -1738,11 +2108,21 @@ def api_book_appointment():
             }
         ), 400
 
-    app_id = application["application_id"]
+    app_id = application[
+        "application_id"
+    ]
 
-    office = data.get("office")
-    date = data.get("date")
-    time_slot = data.get("time")
+    office = data.get(
+        "office"
+    )
+
+    date = data.get(
+        "date"
+    )
+
+    time_slot = data.get(
+        "time"
+    )
 
     if not (
         office
@@ -1853,7 +2233,7 @@ def api_notifications_mark_read():
 
 
 # --------------------------------------------------------------------------
-# Admin
+# Admin Dashboard
 # --------------------------------------------------------------------------
 
 @app.route("/admin")
@@ -1863,7 +2243,10 @@ def admin_dashboard():
     db = get_db()
 
     total = db.execute(
-        "SELECT COUNT(*) c FROM applications"
+        """
+        SELECT COUNT(*) c
+        FROM applications
+        """
     ).fetchone()["c"]
 
     pending = db.execute(
@@ -1945,7 +2328,9 @@ def admin_dashboard():
     )
 
 
-@app.route("/admin/applications")
+@app.route(
+    "/admin/applications"
+)
 @admin_required
 def admin_applications():
 
@@ -2201,7 +2586,9 @@ def api_admin_verify_document(
     )
 
 
-@app.route("/admin/appointments")
+@app.route(
+    "/admin/appointments"
+)
 @admin_required
 def admin_appointments():
 
@@ -2228,7 +2615,9 @@ def admin_appointments():
     )
 
 
-@app.route("/admin/users")
+@app.route(
+    "/admin/users"
+)
 @admin_required
 def admin_users():
 
@@ -2255,7 +2644,9 @@ def admin_users():
     )
 
 
-@app.route("/admin/documents")
+@app.route(
+    "/admin/documents"
+)
 @admin_required
 def admin_documents():
 
@@ -2281,7 +2672,9 @@ def admin_documents():
     )
 
 
-@app.route("/admin/reports")
+@app.route(
+    "/admin/reports"
+)
 @admin_required
 def admin_reports():
 
@@ -2323,7 +2716,9 @@ def admin_reports():
     )
 
 
-@app.route("/admin/settings")
+@app.route(
+    "/admin/settings"
+)
 @admin_required
 def admin_settings():
 
@@ -2344,7 +2739,10 @@ def admin_settings():
 @admin_required
 def api_reset_demo_data():
 
-    """Reset the SQLite demo database (admin only)."""
+    """
+    Reset the SQLite demo database.
+    Admin only.
+    """
 
     init_db(
         reset=True
@@ -2360,14 +2758,20 @@ def api_reset_demo_data():
 
 
 # --------------------------------------------------------------------------
-# Run application
+# IMPORTANT FOR RENDER / GUNICORN
+# --------------------------------------------------------------------------
+
+# Initialize the database when the module is imported.
+# Gunicorn uses: gunicorn app:app
+# Therefore this code MUST run during import.
+init_db(reset=False)
+
+
+# --------------------------------------------------------------------------
+# Local development
 # --------------------------------------------------------------------------
 
 if __name__ == "__main__":
-
-    init_db(
-        reset=False
-    )
 
     app.run(
         debug=True,
